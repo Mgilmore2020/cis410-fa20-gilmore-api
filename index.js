@@ -1,13 +1,86 @@
 const express = require("express");
 const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
 
 const db = require("./dbConnect.js")
+const config = require("./config.js")
 
 const app = express();
 app.use(express.json())
 
 app.get("/hi",(req,res)=>{
     res.send("hello world")
+})
+
+app.post("/jobseeker/login", async (req,res)=>{
+    //console.log(req.body)
+
+    var email = req.body.email;
+    var password = req.body.password;
+
+    if(!email || !password){
+        return res.status(400).send("Bad Request");
+    }
+
+    //1. check that user email exists in the database
+    var query = `SELECT *
+    FROM JobSeeker 
+    WHERE Email = '${email}'`
+
+    
+    let result;
+
+    try{
+        result = await db.executeQuery(query)
+    }catch(myError){
+        console.log("Error in /jobseeker/login:", myError);
+        return res.status(500).send();
+    }
+
+    // console.log(result);
+
+    if(!result[0]){
+        return res.status(400).send("Invalid User Credentials")
+    }
+
+    //2. check their password  
+
+    let user = result[0];
+    // console.log(user);
+
+    if(!bcrypt.compareSync(password, user.Password)){
+        console.log("Invalid Password");
+        return res.status(400).send("Invalid User Credentials");
+    }
+    //3. generate a token
+    
+    let token = jwt.sign({pk: user.JobSeekerPK}, config.JWT, {expiresIn: "60 minutes"})
+
+    //console.log(token)
+
+    //4. Save token in db and send token and user info back to user 
+    let setTokenQuery = `UPDATE JobSeeker
+    SET Token = '${token}'
+    WHERE JobSeekerPK = ${user.JobSeekerPK}`
+
+    try{
+        await db.executeQuery(setTokenQuery)
+
+        res.status(200).send({
+            token: token,
+            user: {
+                NameFirst: user.NameFirst,
+                NameLast: user.NameLast,
+                Email: user.Email,
+                JobSeekerPK: user.JobSeekerPK
+            }
+        })
+    }
+    catch(myError){
+        console.log("error setting user token", myError);
+        res.status(500).send()
+    }
+
 })
 
 app.post("/jobseeker", async (req,res)=>{
