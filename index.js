@@ -10,14 +10,40 @@ app.use(express.json())
 
 
 
-app.post("/applications", auth, (req,res)=>{
-    var workplaceFK = req.body.workplaceFK;
-    var about = req.body.about;
-    var dateApplied = req.body.dateApplied;
+app.post("/applications", auth, async (req,res)=>{
 
-    if(!workplaceFK || !about || !dateApplied){res.status(400).send("Bad Request")}
+    try{
+        var workplaceFK = req.body.workplaceFK;
+        var about = req.body.about;
+        var dateApplied = req.body.dateApplied;
+    
+        if(!workplaceFK || !about || !dateApplied){res.status(400).send("Bad Request")}
 
-    res.send("Here is your response")
+        about = about.replace("'","''")
+    
+        // console.log("Here is the jobseeker in /applications", req.jobseeker)
+        // res.send("Here is your response")
+
+        let insertQuery = `INSERT INTO Application(About, DateApplied, WorkplaceFK, JobSeekerFK)
+        OUTPUT inserted.ApplicationPK, inserted.About, inserted.DateApplied, inserted.JobSeekerFK
+        VALUES('${about}', '${dateApplied}', ${workplaceFK}, ${req.jobseeker.JobSeekerPK})`
+
+        let insertedApplication = await db.executeQuery(insertQuery)
+        
+        
+        //console.log(insertedApplication);
+        
+        
+        res.status(201).send(insertedApplication[0])    
+    }
+    catch(error){
+        console.log("error in POST /applications", error)
+        res.status(500).send();
+    } 
+})
+
+app.get("jobseeker/me", auth, (req,res)=>{
+    res.send(req.jobseeker)
 })
 
 app.get("/hi",(req,res)=>{
