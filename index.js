@@ -4,9 +4,21 @@ const jwt = require("jsonwebtoken")
 
 const db = require("./dbConnect.js")
 const config = require("./config.js")
-
+const auth = require("./middleware/authenticate")
 const app = express();
 app.use(express.json())
+
+
+
+app.post("/applications", auth, (req,res)=>{
+    var workplaceFK = req.body.workplaceFK;
+    var about = req.body.about;
+    var dateApplied = req.body.dateApplied;
+
+    if(!workplaceFK || !about || !dateApplied){res.status(400).send("Bad Request")}
+
+    res.send("Here is your response")
+})
 
 app.get("/hi",(req,res)=>{
     res.send("hello world")
