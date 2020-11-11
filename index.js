@@ -76,7 +76,7 @@ app.post("/applications", auth, async (req,res)=>{
     } 
 })
 
-app.get("jobseeker/me", auth, (req,res)=>{
+app.get("/jobseeker/me", auth, (req,res)=>{
     res.send(req.jobseeker)
 })
 
