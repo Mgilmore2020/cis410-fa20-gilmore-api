@@ -12,6 +12,37 @@ const app = express();
 app.use(express.json())
 app.use(cors())
 
+app.post("/jobseeker/logout", auth, (req,res)=>{
+    var query = `UPDATE JobSeeker
+    SET Token = NULL
+    WHERE JobSeekerPK = ${req.jobseeker.JobSeekerPK}`
+
+    db.executeQuery(query)
+        .then(()=>{res.status(200).send()})
+        .catch((error)=>{
+            console.log("error in POST /jobseeker/logout", error)
+            res.status(500).send()
+        })
+})
+
+app.get("/application/me", auth, async(req,res)=>{
+    let JobSeekerPK = req.jobseeker.JobSeekerPK;
+
+
+
+})
+
+// app.patch("/application/:pk", auth, (req,res)=>{
+//     let applicationPK = req.params.pk
+//     //make sure the jobseekr can only edit their own applications
+// })
+
+// app.delete("/application/:pk", auth, (req,res)=>{
+//     let applicationPK = req.params.pk
+//     //make sure the jobseekr can only delete their own applications
+// })
+
+app.get("/", (req,res)=>{res.send("Hello world")})
 
 app.post("/applications", auth, async (req,res)=>{
 
