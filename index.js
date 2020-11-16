@@ -26,7 +26,7 @@ app.post("/jobseeker/logout", auth, (req,res)=>{
 })
 
 
-    
+    //Homework
     app.get("/application/me", auth, async(req,res)=>{
         let JobSeekerPK = req.jobseeker.JobSeekerPK;
     
