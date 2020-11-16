@@ -25,12 +25,31 @@ app.post("/jobseeker/logout", auth, (req,res)=>{
         })
 })
 
-app.get("/application/me", auth, async(req,res)=>{
-    let JobSeekerPK = req.jobseeker.JobSeekerPK;
+
+    
+    app.get("/application/me", auth, async(req,res)=>{
+        let JobSeekerPK = req.jobseeker.JobSeekerPK;
+    
+        var meQuery = `SELECT *
+        FROM Application
+        LEFT JOIN JobSeeker
+        ON JobSeeker.JobSeekerPK = Application.JobSeekerFK
+        WHERE JobSeekerPK = ${JobSeekerPK}`
+        
+        db.executeQuery(meQuery)
+        .then((result)=>{res.status(200).send(result)})
+            .catch((error)=>{
+                console.log("error in POST /jobseeker/logout", error)
+                res.status(500).send()
+            })
+    
+    
+    })
 
 
 
-})
+
+
 
 // app.patch("/application/:pk", auth, (req,res)=>{
 //     let applicationPK = req.params.pk
