@@ -32,9 +32,9 @@ app.post("/jobseeker/logout", auth, (req,res)=>{
     
         var meQuery = `SELECT *
         FROM Application
-        LEFT JOIN JobSeeker
-        ON JobSeeker.JobSeekerPK = Application.JobSeekerFK
-        WHERE JobSeekerPK = ${JobSeekerPK}`
+        LEFT JOIN Workplace
+        ON Workplace.WorkplacePK = Application.WorkplaceFK
+        WHERE JobSeekerFK = ${JobSeekerPK}`
         
         db.executeQuery(meQuery)
         .then((result)=>{res.status(200).send(result)})
